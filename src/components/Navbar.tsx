@@ -40,7 +40,7 @@ const Navbar = () => {
                 </Link>
 
                 <nav aria-label="Main navigation">
-                    <ul className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-brand-foreground/70">
+                    <ul className="flex flex-wrap items-center justify-center gap-4 text-xs text-brand-foreground/70">
                         {navLinks.map((link) => {
                             const active = isActive(link.href);
 
