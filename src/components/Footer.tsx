@@ -18,9 +18,12 @@ const socialLinks = [
     { label: "LinkedIn", href: "https://linkedin.com", icon: Linkedin01Icon },
 ];
 
-const Footer = () => {
-    const year = new Date().getFullYear();
+async function FooterYear() {
+    "use cache";
+    return new Date().getFullYear();
+}
 
+const Footer = () => {
     return (
         <footer className="mt-auto border-t border-white/10 bg-brand text-brand-foreground">
             <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
@@ -136,7 +139,7 @@ const Footer = () => {
             {/* Copyright */}
             <div className="border-t border-white/10">
                 <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-brand-foreground/60 sm:flex-row sm:px-6 lg:px-8">
-                    <p>&copy; {year} BookNook. All rights reserved.</p>
+                    <p>&copy; <FooterYear /> BookNook. All rights reserved.</p>
                     <p>Read a book every day.</p>
                 </div>
             </div>

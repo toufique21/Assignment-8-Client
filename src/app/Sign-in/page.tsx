@@ -1,84 +1,142 @@
 "use client";
 
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import React from 'react';
-import toast from 'react-hot-toast';
-import { authClient } from '@/lib/auth-client';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
-const SignUpPage = () => {
+const inputClass =
+  "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/60 focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-60";
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLElement>) => {
-        e.preventDefault();
+const labelClass = "mb-1.5 block text-sm font-medium text-foreground";
 
-        const formData = new FormData(e.target);
-        const user = Object.fromEntries(formData.entries()) as { name: string, email: string, password: string };
-        console.log(user);
+const SignInPage = () => {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-        const { data, error } = await authClient.signIn.email({
-            ...user,
-            callbackURL: "/",
-        });
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-        if (error) {
-            console.log(error);
-            toast.error("Check your email and password");
-        }
-        if (data) {
-            console.log(data);
-            toast.success("Sign-Up Successfully");
-            redirect("/");
-        }
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
 
+    if (!email || !password) {
+      toast.error("Please enter your email and password.");
+      return;
     }
 
-    // const handleGoogleSignIn = async () => {
-    //     const data = await authClient.signIn.social({
-    //         provider: "google",
-    //     });
-    // };
-    // const handleGithubSignIn = async () => {
-    //     const data = await authClient.signIn.social({
-    //         provider: "github",
-    //     });
-    // }
+    setIsSubmitting(true);
+    const toastId = toast.loading("Signing you in...");
 
-    return (
-        <div>
-            <h2 className='flex justify-center text-2xl mt-10 px-5 font-bold'>সাইন ইন করুন</h2>
-            <p className='flex justify-center text-xs text-gray-500 mb-5'>বিস্তারিতদাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্ট খুলুন</p>
-            <div className='flex justify-center mb-25'>
-                <form onSubmit={handleSubmit}>
-                    <fieldset className="fieldset bg-base-200 rounded-box w-sm p-4 gap-5">
-                        <div className="grid">
-                            <label className="label">ইমেইল</label>
-                            <input type="email" name="email" className="input w-sm" placeholder="আপনার নাম@gmail.com" />
-                        </div>
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: "/",
+      });
 
-                        <div className="grid">
-                            <label className="label">পাসওয়ার্ড</label>
-                            <input type="password" name="password" className="input w-sm" placeholder="আপনার পাসওয়ার্ড" />
-                        </div>
-                        <button type="submit" className="font-bold text-sm bg-green-700 rounded-xl text-white px-2 py-3 shadow shadow-green-500">সাইন ইন করুন</button>
-                        <div className="grid grid-cols-3 justify-between">
-                            <hr className="bg-gray-700" />
-                            <p className="flex justify-center items-center text-3xl"></p>
-                            <hr />
-                        </div>
-                        <div className="flex justify-between pt-1">
+      if (error) {
+        throw new Error(error.message || "Invalid email or password.");
+      }
 
-                            {/* <button onClick={handleGoogleSignIn} className="flex cursor-pointer justify-center items-center bg-base-200 gap-2 border border-gray-200 rounded px-8 py-2"><FaGoogle />সাইন ইন উইথ Google</button>
-                            <button onClick={handleGithubSignIn} className="flex cursor-pointer justify-center items-center bg-base-200 gap-2 border border-gray-200 rounded px-8 py-2"><FaGithub />সাইন ইন উইথ GitHub</button> */}
-                        </div>
-                        <div className="flex justify-center items-center">
-                            <p>অ্যাকাউন্ট নেই? <Link href={"/Sign-Up"} className="text-green-700">সাইন আপ করুন</Link></p>
-                        </div>
-                    </fieldset>
-                    <div className="flex justify-center gap-3"><Link href="/" className="flex text-sm text-gray-600 items-center gap-4 mt-8">হোম পেইজে ফিরে যান</Link></div>
-                </form>
-            </div>
+      toast.success("Signed in successfully!", { id: toastId });
+      router.push("/");
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not sign you in. Please try again.", {
+        id: toastId,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="container mx-auto px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-md">
+        <div className="mb-8 space-y-2">
+          <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+            Welcome back
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            Sign in to BookNook
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Sign in to add books, track your borrows and manage your collection.
+          </p>
         </div>
-    );
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
+        >
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="email" className={labelClass}>
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                required
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className={labelClass}>
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
+                className={inputClass}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting && (
+              <span
+                aria-hidden="true"
+                className="size-4 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground"
+              />
+            )}
+            {isSubmitting ? "Signing in..." : "Sign In"}
+          </button>
+
+          <p className="mt-5 text-center text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link href="/Sign-Up" className="font-semibold text-foreground hover:underline">
+              Create one
+            </Link>
+          </p>
+        </form>
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground transition hover:text-foreground"
+          >
+            ← Back to home
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 };
 
-export default SignUpPage;
+export default SignInPage;

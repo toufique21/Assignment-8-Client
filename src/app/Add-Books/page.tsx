@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
+import { BOOKS_API } from "@/lib/books";
 
 const BOOK_CATEGORIES = ["Fiction", "Science", "History", "Kids", "Others"] as const;
 
@@ -13,6 +13,7 @@ const initialForm = {
   author: "",
   category: BOOK_CATEGORIES[0] as string,
   imageUrl: "",
+  copies: "1",
   description: "",
 };
 
@@ -61,15 +62,16 @@ const AddBooksPage = () => {
     const toastId = toast.loading("Adding your book...");
 
     try {
-      const bookResponse = await fetch("/api/books", {
+      const bookResponse = await fetch(`${BOOKS_API}/Add-Book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: form.title,
-          author: form.author,
-          category: form.category,
-          description: form.description,
-          imageUrl: form.imageUrl.trim(),
+          ...form,
+          copies: Number(form.copies),
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          createdAt: new Date().toISOString(),
         }),
       });
       const bookResult = (await bookResponse.json()) as { message?: string; error?: string };
@@ -88,6 +90,8 @@ const AddBooksPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  console.log(form);
 
   return (
     <section className="container mx-auto px-4 py-10 sm:py-14">
@@ -108,7 +112,7 @@ const AddBooksPage = () => {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
             <span>You need to be signed in to add a book.</span>
             <Link
-              href="/Sign-in"
+              href="/Sign-In"
               className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-brand-foreground transition hover:bg-brand/90"
             >
               Sign in
@@ -176,6 +180,28 @@ const AddBooksPage = () => {
             </div>
 
             <div>
+              <label htmlFor="copies" className={labelClass}>
+                Number of Copies
+              </label>
+              <input
+                id="copies"
+                name="copies"
+                type="number"
+                value={form.copies}
+                onChange={handleChange}
+                placeholder="e.g. 3"
+                required
+                min={1}
+                max={9999}
+                step={1}
+                className={inputClass}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                How many copies of this book are available to borrow?
+              </p>
+            </div>
+
+            <div className="sm:col-span-2">
               <label htmlFor="imageUrl" className={labelClass}>
                 Book Image Link
               </label>
@@ -273,7 +299,7 @@ const AddBooksPage = () => {
             </p>
             <button
               type="submit"
-              disabled={!user || isSubmitting}
+            //   disabled={!user || isSubmitting}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting && (

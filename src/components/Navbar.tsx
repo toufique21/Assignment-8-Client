@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import UserInfo from "./UserInfo";
 
 const navLinks = [
     { label: "Home", href: "/" },
@@ -88,9 +89,7 @@ const Navbar = () => {
                     </ul>
                 </nav>
 
-                <div className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-sm text-brand-foreground/70 backdrop-blur-md">
-                    User Info
-                </div>
+                <UserInfo />
             </div>
         </header>
     );
