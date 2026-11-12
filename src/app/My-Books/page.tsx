@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { BOOKS_API, type Book } from "@/lib/books";
+import { getCoverSrc } from "@/lib/images";
 
 const primaryButtonClass =
   "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
@@ -117,55 +118,59 @@ const MyBooksPage = () => {
 
         {user && !isLoading && !error && books.length > 0 && (
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {books.map((book) => (
-              <li
-                key={book._id}
-                className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="relative aspect-[3/4] w-full bg-muted">
-                  {book.imageUrl ? (
-                    <Image
-                      src={book.imageUrl}
-                      alt={`Cover of ${book.title}`}
-                      fill
-                      unoptimized
-                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-                      No cover
-                    </div>
-                  )}
-                </div>
+            {books.map((book) => {
+              const coverSrc = getCoverSrc(book.imageUrl);
 
-                <div className="flex flex-1 flex-col gap-3 p-5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {book.category && (
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                        {book.category}
-                      </span>
+              return (
+                <li
+                  key={book._id}
+                  className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="relative aspect-[3/4] w-full bg-muted">
+                    {coverSrc ? (
+                      <Image
+                        src={coverSrc}
+                        alt={`Cover of ${book.title}`}
+                        fill
+                        unoptimized
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
+                        No cover
+                      </div>
                     )}
-                    <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-brand">
-                      {typeof book.copies === "number" ? `${book.copies} copies` : "Available"}
-                    </span>
                   </div>
 
-                  <div>
-                    <h2 className="line-clamp-2 text-base font-semibold text-foreground">
-                      {book.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">by {book.author}</p>
-                  </div>
+                  <div className="flex flex-1 flex-col gap-3 p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {book.category && (
+                        <span className="rounded-full bg-muted px-2.5 py-1 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground uppercase">
+                          {book.category}
+                        </span>
+                      )}
+                      <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-brand">
+                        {typeof book.copies === "number" ? `${book.copies} copies` : "Available"}
+                      </span>
+                    </div>
 
-                  {book.description && (
-                    <p className="line-clamp-3 text-sm text-muted-foreground">
-                      {book.description}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
+                    <div>
+                      <h2 className="line-clamp-2 text-base font-semibold text-foreground">
+                        {book.title}
+                      </h2>
+                      <p className="mt-1 text-sm text-muted-foreground">by {book.author}</p>
+                    </div>
+
+                    {book.description && (
+                      <p className="line-clamp-3 text-sm text-muted-foreground">
+                        {book.description}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

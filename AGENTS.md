@@ -66,6 +66,7 @@ src/
     api/
       auth/[...all]/route.ts  # better-auth handler via toNextJsHandler(auth)
       books/route.ts          # POST /api/books — session-guarded Mongo insert
+      image/route.ts          # GET /api/image?url= — resolves ImgBB page links to files
   components/
     Navbar.tsx            # client; active-link styling via usePathname
     UserInfo.tsx          # client; session dropdown / sign-in links
@@ -77,6 +78,7 @@ src/
     auth.ts               # betterAuth() server instance (Mongo adapter)
     auth-client.ts        # createAuthClient() browser client
     books.ts              # BOOKS_API base URL + shared Book type
+    images.ts             # getCoverSrc() — ImgBB page links → /api/image
     db.ts                 # MongoClient + db("BookNook"), cached on globalThis in dev
     utils.ts              # re-exports cn from the "cn" package
 public/                   # static assets (logo: 5078755.png, hero slides: 1.png–3.png)
@@ -104,6 +106,7 @@ Import alias: `@/*` maps to `./src/*` (e.g. `@/components/Navbar`, `@/lib/auth-c
 - **Styling:** Tailwind utilities with the semantic tokens in `globals.css` (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card`, …) plus the project-specific `bg-brand` / `text-brand-foreground` (deep green `#081c05`) used by Navbar/Footer/buttons. Prefer these over hard-coded colors.
 - **daisyUI is used in places:** `<html data-theme="light">` is set in `layout.tsx`, and `UserInfo` uses `dropdown`, `menu`, and `avatar` classes. Both Tailwind utilities and daisyUI classes appear in the codebase — match the file you're editing rather than mixing styles in one component.
 - **Images:** `next.config.ts` allows remote images from `avatars.githubusercontent.com`, `lh3.googleusercontent.com`, and `i.ibb.co`. Book covers from user-supplied links are rendered with `unoptimized`; add a `remotePatterns` entry before using `next/image` with a new host.
+- **Book covers:** always render `book.imageUrl` through `getCoverSrc()` (`@/lib/images`). Users paste ImgBB *page* links (`https://ibb.co.com/<id>`), which are HTML pages and render as broken images; `getCoverSrc()` rewrites those to `/api/image?url=…`, which resolves the real file via ImgBB's oEmbed JSON and redirects. Direct links pass through unchanged.
 - **`cn` helper:** import from `@/lib/utils`. Some generated shadcn files import directly from `"cn"`; both resolve, but new code should use `@/lib/utils`.
 - **UI primitives** live in `src/components/ui/`. Add new shadcn components with the CLI (`components.json` is configured) rather than hand-rolling.
 - Use `next/image` for images and `next/link` for navigation.

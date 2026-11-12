@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BOOKS_API, type Book } from "@/lib/books";
+import { getCoverSrc } from "@/lib/images";
 
 const backLinkClass =
   "inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground";
@@ -109,6 +110,7 @@ export const BookDetails = () => {
   }
 
   const addedOn = formatDate(book.createdAt);
+  const coverSrc = getCoverSrc(book.imageUrl);
 
   return (
     <section className="container mx-auto px-4 py-10 sm:py-14">
@@ -119,9 +121,9 @@ export const BookDetails = () => {
 
         <div className="mt-6 grid gap-8 md:grid-cols-[minmax(0,20rem)_1fr] md:gap-10">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
-            {book.imageUrl ? (
+            {coverSrc ? (
               <Image
-                src={book.imageUrl}
+                src={coverSrc}
                 alt={`Cover of ${book.title}`}
                 fill
                 unoptimized
