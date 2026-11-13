@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FaTrash } from "react-icons/fa";
+import { FaPen, FaTrash } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
 import { BOOKS_API, type Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
@@ -20,11 +20,51 @@ import {
 const primaryButtonClass =
   "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
+const saveButtonClass =
+  "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
+
+const editButtonClass =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
+
 const deleteButtonClass =
   "inline-flex items-center justify-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive transition hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destructive disabled:cursor-not-allowed disabled:opacity-50";
 
 const cancelButtonClass =
   "inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
+
+const labelClass = "mb-1.5 block text-sm font-medium text-foreground";
+
+const inputClass =
+  "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/60 focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-60";
+
+const BOOK_CATEGORIES = ["Fiction", "Science", "History", "Kids", "Others"] as const;
+
+type EditForm = {
+  title: string;
+  author: string;
+  category: string;
+  imageUrl: string;
+  copies: string;
+  description: string;
+};
+
+const emptyEditForm: EditForm = {
+  title: "",
+  author: "",
+  category: BOOK_CATEGORIES[0],
+  imageUrl: "",
+  copies: "1",
+  description: "",
+};
+
+const isHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 const MyBooksPage = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -36,6 +76,9 @@ const MyBooksPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [bookToEdit, setBookToEdit] = useState<Book | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>(emptyEditForm);
+  const [isSaving, setIsSaving] = useState(false);
 
   const isDeletingBook = Boolean(bookToDelete) && deletingId === bookToDelete?._id;
 
@@ -104,6 +147,85 @@ const MyBooksPage = () => {
       });
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const openEditDialog = (book: Book) => {
+    setEditForm({
+      title: book.title ?? "",
+      author: book.author ?? "",
+      category: book.category ?? BOOK_CATEGORIES[0],
+      imageUrl: book.imageUrl ?? "",
+      copies: typeof book.copies === "number" ? String(book.copies) : "1",
+      description: book.description ?? "",
+    });
+    setBookToEdit(book);
+  };
+
+  const handleEditChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = event.target;
+    setEditForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!bookToEdit) return;
+
+    if (!userEmail) {
+      toast.error("Please sign in before editing a book.");
+      return;
+    }
+
+    if (!isHttpUrl(editForm.imageUrl)) {
+      toast.error("Please paste a valid image link from ImgBB.");
+      return;
+    }
+
+    const copies = Number(editForm.copies);
+
+    if (!Number.isInteger(copies) || copies < 1) {
+      toast.error("Number of copies must be a whole number of at least 1.");
+      return;
+    }
+
+    setIsSaving(true);
+    const toastId = toast.loading("Saving your changes...");
+
+    try {
+      const response = await fetch(
+        `${BOOKS_API}/My-Books/${bookToEdit._id}?email=${encodeURIComponent(userEmail)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...editForm, copies }),
+        },
+      );
+      const result = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        error?: string;
+        book?: Book;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not update this book. Please try again.");
+      }
+
+      const updatedBook = result.book ?? { ...bookToEdit, ...editForm, copies };
+
+      setBooks((current) =>
+        current.map((item) => (item._id === updatedBook._id ? updatedBook : item)),
+      );
+      setBookToEdit(null);
+      toast.success(result.message ?? "Book updated successfully.", { id: toastId });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong.", {
+        id: toastId,
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -226,6 +348,15 @@ const MyBooksPage = () => {
                     <div className="mt-auto flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
                       <button
                         type="button"
+                        onClick={() => openEditDialog(book)}
+                        disabled={Boolean(deletingId)}
+                        className={editButtonClass}
+                      >
+                        <FaPen aria-hidden="true" className="size-3" />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setBookToDelete(book)}
                         disabled={Boolean(deletingId)}
                         className={deleteButtonClass}
@@ -284,6 +415,176 @@ const MyBooksPage = () => {
                   {isDeletingBook ? "Deleting..." : "Yes, delete it"}
                 </button>
               </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {bookToEdit && (
+          <Dialog
+            open
+            onOpenChange={(open) => {
+              if (!open && !isSaving) setBookToEdit(null);
+            }}
+          >
+            <DialogContent
+              showCloseButton={!isSaving}
+              className="max-h-[calc(100vh-4rem)] overflow-y-auto sm:max-w-lg"
+            >
+              <DialogHeader>
+                <DialogTitle>Edit book</DialogTitle>
+                <DialogDescription>
+                  Update the details of &ldquo;{bookToEdit.title}&rdquo;. Your name and email
+                  can&apos;t be changed.
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleEditSubmit} className="grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="edit-title" className={labelClass}>
+                      Book Title
+                    </label>
+                    <input
+                      id="edit-title"
+                      name="title"
+                      type="text"
+                      value={editForm.title}
+                      onChange={handleEditChange}
+                      placeholder="e.g. The Silent Library"
+                      required
+                      maxLength={150}
+                      disabled={isSaving}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-author" className={labelClass}>
+                      Author Name
+                    </label>
+                    <input
+                      id="edit-author"
+                      name="author"
+                      type="text"
+                      value={editForm.author}
+                      onChange={handleEditChange}
+                      placeholder="e.g. Jane Austen"
+                      required
+                      maxLength={120}
+                      disabled={isSaving}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-category" className={labelClass}>
+                      Category
+                    </label>
+                    <select
+                      id="edit-category"
+                      name="category"
+                      value={editForm.category}
+                      onChange={handleEditChange}
+                      required
+                      disabled={isSaving}
+                      className={inputClass}
+                    >
+                      {BOOK_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="edit-copies" className={labelClass}>
+                      Number of Copies
+                    </label>
+                    <input
+                      id="edit-copies"
+                      name="copies"
+                      type="number"
+                      value={editForm.copies}
+                      onChange={handleEditChange}
+                      placeholder="e.g. 3"
+                      required
+                      min={1}
+                      max={9999}
+                      step={1}
+                      disabled={isSaving}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="edit-imageUrl" className={labelClass}>
+                    Book Image Link
+                  </label>
+                  <input
+                    id="edit-imageUrl"
+                    name="imageUrl"
+                    type="url"
+                    value={editForm.imageUrl}
+                    onChange={handleEditChange}
+                    placeholder="https://i.ibb.co/xxxxx/cover.jpg"
+                    required
+                    disabled={isSaving}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-description" className={labelClass}>
+                    Short Description
+                  </label>
+                  <textarea
+                    id="edit-description"
+                    name="description"
+                    value={editForm.description}
+                    onChange={handleEditChange}
+                    placeholder="Tell readers what this book is about in a sentence or two..."
+                    required
+                    rows={4}
+                    maxLength={1000}
+                    disabled={isSaving}
+                    className={`${inputClass} resize-y`}
+                  />
+                </div>
+
+                <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+                  Added by{" "}
+                  <span className="font-medium text-foreground">
+                    {bookToEdit.userName ?? user?.name ?? "you"}
+                  </span>{" "}
+                  ·{" "}
+                  <span className="font-medium text-foreground">
+                    {bookToEdit.userEmail ?? userEmail}
+                  </span>
+                  <span className="mt-0.5 block">Name and email are read-only.</span>
+                </div>
+
+                <DialogFooter>
+                  <button
+                    type="button"
+                    onClick={() => setBookToEdit(null)}
+                    disabled={isSaving}
+                    className={cancelButtonClass}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={isSaving} className={saveButtonClass}>
+                    {isSaving && (
+                      <span
+                        aria-hidden="true"
+                        className="size-3 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground"
+                      />
+                    )}
+                    {isSaving ? "Saving..." : "Save changes"}
+                  </button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         )}
