@@ -60,7 +60,8 @@ src/
     All-Books/[id]/BookDetails.tsx # client details view for one book
     Add-Books/page.tsx    # /Add-Books (client form)
     My-Books/page.tsx     # /My-Books (client list, fetches user's books)
-    My-Borrows/page.tsx   # /My-Borrows (placeholder)
+    My-Borrows/page.tsx   # /My-Borrows (client table of active borrows)
+    My-Profile/page.tsx   # /My-Profile (client profile overview from the session)
     Sign-In/page.tsx      # /Sign-In (better-auth email sign in)
     Sign-Up/page.tsx      # /Sign-Up (email sign up + Google/GitHub buttons)
     api/
@@ -74,6 +75,8 @@ src/
     HeroPage.jsx          # client; swiper carousel
     About.tsx             # feature highlights
     ui/button.tsx         # shadcn-generated primitive
+  hooks/
+    use-require-auth.ts   # client guard: redirects to /Sign-In when there is no session
   lib/
     auth.ts               # betterAuth() server instance (Mongo adapter)
     auth-client.ts        # createAuthClient() browser client
@@ -81,6 +84,7 @@ src/
     images.ts             # getCoverSrc() — ImgBB page links → /api/image
     db.ts                 # MongoClient + db("BookNook"), cached on globalThis in dev
     utils.ts              # re-exports cn from the "cn" package
+  proxy.ts                # Next 16 proxy: redirects signed-out users away from protected pages
 public/                   # static assets (logo: 5078755.png, hero slides: 1.png–3.png)
 ```
 
@@ -99,6 +103,7 @@ Import alias: `@/*` maps to `./src/*` (e.g. `@/components/Navbar`, `@/lib/auth-c
 - **Navbar and Footer are global** (mounted in `src/app/layout.tsx`). Page components return page content only; don't re-add the layout chrome.
 - **The root layout wraps `<Navbar />` in `<Suspense>`** because `usePathname()` is runtime data on dynamic routes; without that boundary any `/segment/[id]` route fails to prerender. Keep it when editing the layout, and wrap new dynamic-route pages that read `useParams`/`searchParams` in their own `<Suspense>` too (see `All-Books/[id]/page.tsx`).
 - **Session access:** client components call `authClient.useSession()` and read `session?.user` (`{ id, name, email, image }`). Server code calls `auth.api.getSession({ headers: await headers() })`. Guard UI on `isPending` before treating a missing user as signed out.
+- **Protected pages:** `/Add-Books`, `/My-Books`, `/My-Borrows`, `/My-Profile`, and book details (`/All-Books/:id`, but not the `/All-Books` list) require a session. `src/proxy.ts` redirects signed-out requests to `/Sign-In` server-side (Next 16 `proxy`, not `middleware`; keep `config.matcher` a literal array), and protected client components call `useRequireAuth()` from `@/hooks/use-require-auth` as a client-side fallback. When adding a protected route, update both.
 - **Feedback:** use `react-hot-toast` (`toast.loading` → `toast.success/error` with the same `id`) as the existing forms do. `<Toaster position="top-center" />` is already in the root layout.
 - **Next 16 APIs differ from older versions.** Before using route params, `searchParams`, metadata, caching, or navigation APIs, read the matching guide under `node_modules/next/dist/docs/01-app/`. Note the global generated type `LayoutProps<"/">` used in `layout.tsx`.
 - **`cacheComponents: true` is on.** `Footer` already uses a `"use cache"` helper. Assume caching/partial-prefetch semantics apply; use the Next 16 docs rather than pre-16 patterns (`dynamic = "force-dynamic"`, etc.).
@@ -111,7 +116,7 @@ Import alias: `@/*` maps to `./src/*` (e.g. `@/components/Navbar`, `@/lib/auth-c
 - **UI primitives** live in `src/components/ui/`. Add new shadcn components with the CLI (`components.json` is configured) rather than hand-rolling.
 - Use `next/image` for images and `next/link` for navigation.
 - **Page style:** mostly `const XPage = () => …; export default XPage` (the home page is the exception, using `export default function Home()`). Keep components small and extract shared class strings into module-level constants (see `inputClass`, `labelClass`, `primaryButtonClass`).
-- **Known gaps:** `/Profile` is linked from `UserInfo` but has no route; `My-Borrows` is a placeholder; `metadata` in `layout.tsx` is still the create-next-app default; `Add-Books` still has a stray `console.log(form)`, and the `copies` field it submits is ignored by `/api/books`.
+- **Known gaps:** `My-Borrows` only lists active borrows (returned history is dropped from the UI); `metadata` in `layout.tsx` is still the create-next-app default; `Add-Books` still has a stray `console.log(form)`, and the `copies` field it submits is ignored by `/api/books`.
 
 ## Don'ts
 

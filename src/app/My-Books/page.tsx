@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaPen, FaTrash } from "react-icons/fa";
-import { authClient } from "@/lib/auth-client";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { BOOKS_API, type Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
 import {
@@ -84,8 +84,7 @@ const formatDate = (value?: string) => {
 };
 
 const MyBooksPage = () => {
-  const { data: session, isPending } = authClient.useSession();
-  const user = session?.user;
+  const { user, isPending } = useRequireAuth();
   const userEmail = user?.email;
 
   const [books, setBooks] = useState<Book[]>([]);
@@ -259,9 +258,7 @@ const MyBooksPage = () => {
             My Books
           </h1>
           <p className="max-w-xl text-sm text-muted-foreground">
-            {user
-              ? "Only the books you have added to BookNook appear here."
-              : "Sign in to see the books you have added to BookNook."}
+            Only the books you have added to BookNook appear here.
           </p>
         </div>
 
@@ -276,14 +273,12 @@ const MyBooksPage = () => {
         )}
 
         {!isPending && !user && (
-          <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground">You are not signed in</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Sign in to see the books you have added.
-            </p>
-            <Link href="/Sign-In" className={`${primaryButtonClass} mt-6`}>
-              Sign in
-            </Link>
+          <div className="flex items-center justify-center gap-3 rounded-2xl border border-border bg-card p-10 text-sm text-muted-foreground shadow-sm">
+            <span
+              aria-hidden="true"
+              className="size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"
+            />
+            Redirecting to sign in...
           </div>
         )}
 

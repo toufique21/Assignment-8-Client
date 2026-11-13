@@ -55,7 +55,7 @@ const UserInfo = () => {
             </li>
 
             <li>
-              <Link href="/Profile" className="flex items-center gap-2 rounded-lg py-3 text-sm"><FaUser />আমার প্রোফাইল</Link>
+              <Link href="/My-Profile" className="flex items-center gap-2 rounded-lg py-3 text-sm"><FaUser />My Profile</Link>
             </li>
 
             <li className="mt-2">

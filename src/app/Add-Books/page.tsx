@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { authClient } from "@/lib/auth-client";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { BOOKS_API } from "@/lib/books";
 
 const BOOK_CATEGORIES = ["Fiction", "Science", "History", "Kids", "Others"] as const;
@@ -32,8 +31,7 @@ const isHttpUrl = (value: string) => {
 };
 
 const AddBooksPage = () => {
-  const { data: session, isPending } = authClient.useSession();
-  const user = session?.user;
+  const { user, isPending } = useRequireAuth();
 
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,6 +91,22 @@ const AddBooksPage = () => {
 
   console.log(form);
 
+  if (!user) {
+    return (
+      <section className="container mx-auto px-4 py-10 sm:py-14">
+        <div className="mx-auto max-w-3xl">
+          <div className="flex items-center justify-center gap-3 rounded-2xl border border-border bg-card p-10 text-sm text-muted-foreground shadow-sm">
+            <span
+              aria-hidden="true"
+              className="size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"
+            />
+            {isPending ? "Checking your session..." : "Redirecting to sign in..."}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="container mx-auto px-4 py-10 sm:py-14">
       <div className="mx-auto max-w-3xl">
@@ -107,18 +121,6 @@ const AddBooksPage = () => {
             Fill in the details below and add a new book to the BookNook collection.
           </p>
         </div>
-
-        {!isPending && !user && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/60 px-4 py-3 text-sm text-muted-foreground">
-            <span>You need to be signed in to add a book.</span>
-            <Link
-              href="/Sign-In"
-              className="rounded-full bg-brand px-4 py-1.5 text-xs font-semibold text-brand-foreground transition hover:bg-brand/90"
-            >
-              Sign in
-            </Link>
-          </div>
-        )}
 
         <form
           onSubmit={handleSubmit}

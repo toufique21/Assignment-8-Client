@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import BorrowBookButton from "@/components/BorrowBookButton";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { BOOKS_API, type Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
 
@@ -30,6 +31,8 @@ const formatDate = (value?: string) => {
 
 export const BookDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const { user, isPending } = useRequireAuth();
+  const canLoad = Boolean(user);
 
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,7 @@ export const BookDetails = () => {
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !canLoad) return;
 
     const controller = new AbortController();
 
@@ -70,12 +73,28 @@ export const BookDetails = () => {
       });
 
     return () => controller.abort();
-  }, [id, reloadKey]);
+  }, [id, reloadKey, canLoad]);
 
   const handleRetry = () => {
     setIsLoading(true);
     setReloadKey((key) => key + 1);
   };
+
+  if (isPending || !user) {
+    return (
+      <section className="container mx-auto px-4 py-10 sm:py-14">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-center justify-center gap-3 rounded-2xl border border-border bg-card p-10 text-sm text-muted-foreground shadow-sm">
+            <span
+              aria-hidden="true"
+              className="size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"
+            />
+            {isPending ? "Checking your session..." : "Redirecting to sign in..."}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return <BookDetailsSkeleton />;
