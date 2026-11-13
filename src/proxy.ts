@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 
 export const config = {
-  matcher: ["/Add-Books", "/My-Books", "/My-Borrows", "/My-Profile", ],
+  matcher: ["/Add-Books", "/My-Books", "/My-Borrows", "/My-Profile", "/All-Books/:id"],
 };
 
 export async function proxy(request: NextRequest) {
