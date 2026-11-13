@@ -89,7 +89,7 @@ Import alias: `@/*` maps to `./src/*` (e.g. `@/components/Navbar`, `@/lib/auth-c
 ## Data flow (two backends — read before changing fetching code)
 
 - **Auth + `/api/books`** are handled by this Next app (`src/app/api/*`). `POST /api/books` validates the body, requires a session (`auth.api.getSession`), and inserts into the `books` collection.
-- **Book CRUD used by the UI** goes to the external server instead: `Add-Books` POSTs to `/Add-Book`, `My-Books` GETs `/My-Books?email=…`, and `All-Books` / `All-Books/[id]` GET `/All-Books` and `/All-Books/:id`. Import the base URL and the `Book` type from `@/lib/books` (`BOOKS_API`) instead of re-declaring them per page.
+- **Book CRUD used by the UI** goes to the external server instead: `Add-Books` POSTs to `/Add-Book`, `My-Books` GETs `/My-Books?email=…` and DELETEs `/My-Books/:id?email=…`, and `All-Books` / `All-Books/[id]` GET `/All-Books` and `/All-Books/:id`. Import the base URL and the `Book` type from `@/lib/books` (`BOOKS_API`) instead of re-declaring them per page.
 - Before pointing pages at `/api/books` (or changing the hard-coded URL), ask — it changes which server is the source of truth.
 
 ## Conventions & gotchas

@@ -3,12 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { FaTrash } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
 import { BOOKS_API, type Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
 
 const primaryButtonClass =
   "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+
+const deleteButtonClass =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive transition hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-destructive disabled:cursor-not-allowed disabled:opacity-50";
+
+const cancelButtonClass =
+  "inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50";
 
 const MyBooksPage = () => {
   const { data: session, isPending } = authClient.useSession();
@@ -18,6 +26,8 @@ const MyBooksPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loadedEmail, setLoadedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isLoading = Boolean(userEmail) && loadedEmail !== userEmail;
 
@@ -51,6 +61,41 @@ const MyBooksPage = () => {
 
     return () => controller.abort();
   }, [userEmail]);
+
+  const handleDelete = async (book: Book) => {
+    if (!userEmail) {
+      toast.error("Please sign in before deleting a book.");
+      return;
+    }
+
+    setDeletingId(book._id);
+    const toastId = toast.loading(`Deleting "${book.title}"...`);
+
+    try {
+      const response = await fetch(
+        `${BOOKS_API}/My-Books/${book._id}?email=${encodeURIComponent(userEmail)}`,
+        { method: "DELETE" },
+      );
+      const result = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not delete this book. Please try again.");
+      }
+
+      setBooks((current) => current.filter((item) => item._id !== book._id));
+      setConfirmingId(null);
+      toast.success(result.message ?? "Book deleted successfully.", { id: toastId });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong.", {
+        id: toastId,
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const showEmptyState = Boolean(user) && !isLoading && !error && books.length === 0;
 
@@ -120,11 +165,15 @@ const MyBooksPage = () => {
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {books.map((book) => {
               const coverSrc = getCoverSrc(book.imageUrl);
+              const isDeleting = deletingId === book._id;
+              const isConfirming = confirmingId === book._id;
 
               return (
                 <li
                   key={book._id}
-                  className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className={`flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                    isConfirming ? "border-destructive/40" : "border-border"
+                  }`}
                 >
                   <div className="relative aspect-[3/4] w-full bg-muted">
                     {coverSrc ? (
@@ -167,6 +216,51 @@ const MyBooksPage = () => {
                         {book.description}
                       </p>
                     )}
+
+                    <div className="mt-auto flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
+                      {isConfirming ? (
+                        <>
+                          <span
+                            role="status"
+                            className="mr-auto text-xs font-medium text-destructive"
+                          >
+                            Delete this book?
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmingId(null)}
+                            disabled={isDeleting}
+                            className={cancelButtonClass}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(book)}
+                            disabled={isDeleting}
+                            className={deleteButtonClass}
+                          >
+                            {isDeleting && (
+                              <span
+                                aria-hidden="true"
+                                className="size-3 animate-spin rounded-full border-2 border-destructive/30 border-t-destructive"
+                              />
+                            )}
+                            {isDeleting ? "Deleting..." : "Yes, delete"}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(book._id)}
+                          disabled={Boolean(deletingId)}
+                          className={deleteButtonClass}
+                        >
+                          <FaTrash aria-hidden="true" className="size-3" />
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </li>
               );
