@@ -66,6 +66,23 @@ const isHttpUrl = (value: string) => {
   }
 };
 
+const headCellClass =
+  "px-4 py-3 text-[0.6875rem] font-semibold tracking-wide uppercase text-muted-foreground";
+
+const formatDate = (value?: string) => {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 const MyBooksPage = () => {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
@@ -294,82 +311,119 @@ const MyBooksPage = () => {
         )}
 
         {user && !isLoading && !error && books.length > 0 && (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {books.map((book) => {
-              const coverSrc = getCoverSrc(book.imageUrl);
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[56rem] text-left text-sm">
+                <thead className="border-b border-border bg-muted/50">
+                  <tr>
+                    <th scope="col" className={headCellClass}>
+                      Image
+                    </th>
+                    <th scope="col" className={headCellClass}>
+                      Title
+                    </th>
+                    <th scope="col" className={headCellClass}>
+                      Author
+                    </th>
+                    <th scope="col" className={headCellClass}>
+                      Category
+                    </th>
+                    <th scope="col" className={headCellClass}>
+                      Copies
+                    </th>
+                    <th scope="col" className={headCellClass}>
+                      Added
+                    </th>
+                    <th scope="col" className={`${headCellClass} text-right`}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
 
-              return (
-                <li
-                  key={book._id}
-                  className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="relative aspect-[3/4] w-full bg-muted">
-                    {coverSrc ? (
-                      <Image
-                        src={coverSrc}
-                        alt={`Cover of ${book.title}`}
-                        fill
-                        unoptimized
-                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-                        No cover
-                      </div>
-                    )}
-                  </div>
+                <tbody className="divide-y divide-border">
+                  {books.map((book) => {
+                    const coverSrc = getCoverSrc(book.imageUrl);
 
-                  <div className="flex flex-1 flex-col gap-3 p-5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {book.category && (
-                        <span className="rounded-full bg-muted px-2.5 py-1 text-[0.6875rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                          {book.category}
-                        </span>
-                      )}
-                      <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-brand">
-                        {typeof book.copies === "number" ? `${book.copies} copies` : "Available"}
-                      </span>
-                    </div>
+                    return (
+                      <tr key={book._id} className="align-middle">
+                        <td className="px-4 py-4">
+                          <div className="relative h-16 w-12 overflow-hidden rounded-md bg-muted ring-1 ring-border">
+                            {coverSrc ? (
+                              <Image
+                                src={coverSrc}
+                                alt={`Cover of ${book.title}`}
+                                fill
+                                unoptimized
+                                sizes="3rem"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex size-full items-center justify-center text-center text-[0.5625rem] leading-tight text-muted-foreground">
+                                No cover
+                              </div>
+                            )}
+                          </div>
+                        </td>
 
-                    <div>
-                      <h2 className="line-clamp-2 text-base font-semibold text-foreground">
-                        {book.title}
-                      </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">by {book.author}</p>
-                    </div>
+                        <td className="px-4 py-4">
+                          <Link
+                            href={`/All-Books/${book._id}`}
+                            className="line-clamp-2 font-semibold text-foreground transition hover:text-brand"
+                          >
+                            {book.title}
+                          </Link>
+                          {book.description && (
+                            <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                              {book.description}
+                            </p>
+                          )}
+                        </td>
 
-                    {book.description && (
-                      <p className="line-clamp-3 text-sm text-muted-foreground">
-                        {book.description}
-                      </p>
-                    )}
+                        <td className="px-4 py-4 text-muted-foreground">{book.author}</td>
 
-                    <div className="mt-auto flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
-                      <button
-                        type="button"
-                        onClick={() => openEditDialog(book)}
-                        disabled={Boolean(deletingId)}
-                        className={editButtonClass}
-                      >
-                        <FaPen aria-hidden="true" className="size-3" />
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setBookToDelete(book)}
-                        disabled={Boolean(deletingId)}
-                        className={deleteButtonClass}
-                      >
-                        <FaTrash aria-hidden="true" className="size-3" />
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                        <td className="px-4 py-4 whitespace-nowrap text-muted-foreground">
+                          {book.category ?? "—"}
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[0.6875rem] font-semibold text-brand">
+                            {typeof book.copies === "number" ? book.copies : "—"}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap text-muted-foreground">
+                          {formatDate(book.createdAt)}
+                        </td>
+
+                        <td className="px-4 py-4">
+                          <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => openEditDialog(book)}
+                              disabled={Boolean(deletingId)}
+                              className={editButtonClass}
+                            >
+                              <FaPen aria-hidden="true" className="size-3" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBookToDelete(book)}
+                              disabled={Boolean(deletingId)}
+                              className={deleteButtonClass}
+                            >
+                              <FaTrash aria-hidden="true" className="size-3" />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
         {bookToDelete && (
