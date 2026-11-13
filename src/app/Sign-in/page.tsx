@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
 
 const inputClass =
@@ -50,6 +51,17 @@ const SignInPage = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSocialSignIn = async (provider: "google" | "github") => {
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL: "/",
+    });
+
+    if (error) {
+      toast.error(error.message || `Could not sign in with ${provider}.`);
     }
   };
 
@@ -118,7 +130,34 @@ const SignInPage = () => {
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
 
-          <p className="mt-5 text-center text-sm text-muted-foreground">
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-[0.625rem] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+              or continue with
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("google")}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
+            >
+              <FaGoogle className="size-3.5" aria-hidden="true" />
+              Google
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSocialSignIn("github")}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
+            >
+              <FaGithub className="size-3.5" aria-hidden="true" />
+              GitHub
+            </button>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link href="/Sign-Up" className="font-semibold text-foreground hover:underline">
               Create one

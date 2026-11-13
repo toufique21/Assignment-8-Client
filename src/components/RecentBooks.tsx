@@ -22,7 +22,10 @@ const RecentBooks = () => {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${BOOKS_API}/All-Books`, { signal: controller.signal })
+    fetch(`${BOOKS_API}/All-Books`, {
+      signal: controller.signal,
+      credentials: "include",
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Could not load the latest books. Please try again.");

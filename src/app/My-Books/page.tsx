@@ -105,8 +105,9 @@ const MyBooksPage = () => {
 
     const controller = new AbortController();
 
-    fetch(`${BOOKS_API}/My-Books?email=${encodeURIComponent(userEmail)}`, {
+    fetch(`${BOOKS_API}/My-Books`, {
       signal: controller.signal,
+      credentials: "include",
     })
       .then((response) => {
         if (!response.ok) {
@@ -142,8 +143,8 @@ const MyBooksPage = () => {
 
     try {
       const response = await fetch(
-        `${BOOKS_API}/My-Books/${book._id}?email=${encodeURIComponent(userEmail)}`,
-        { method: "DELETE" },
+        `${BOOKS_API}/My-Books/${book._id}`,
+        { method: "DELETE", credentials: "include" },
       );
       const result = (await response.json().catch(() => ({}))) as {
         message?: string;
@@ -212,10 +213,11 @@ const MyBooksPage = () => {
 
     try {
       const response = await fetch(
-        `${BOOKS_API}/My-Books/${bookToEdit._id}?email=${encodeURIComponent(userEmail)}`,
+        `${BOOKS_API}/My-Books/${bookToEdit._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ ...editForm, copies }),
         },
       );

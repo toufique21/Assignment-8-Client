@@ -44,7 +44,10 @@ export const BookDetails = () => {
 
     const controller = new AbortController();
 
-    fetch(`${BOOKS_API}/All-Books/${id}`, { signal: controller.signal })
+    fetch(`${BOOKS_API}/All-Books/${id}`, {
+      signal: controller.signal,
+      credentials: "include",
+    })
       .then((response) => {
         if (response.status === 404) {
           throw new Error("We could not find that book. It may have been removed.");

@@ -63,13 +63,10 @@ const AddBooksPage = () => {
       const bookResponse = await fetch(`${BOOKS_API}/Add-Book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           ...form,
           copies: Number(form.copies),
-          userId: user.id,
-          userName: user.name,
-          userEmail: user.email,
-          createdAt: new Date().toISOString(),
         }),
       });
       const bookResult = (await bookResponse.json()) as { message?: string; error?: string };

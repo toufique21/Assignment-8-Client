@@ -93,7 +93,8 @@ Import alias: `@/*` maps to `./src/*` (e.g. `@/components/Navbar`, `@/lib/auth-c
 ## Data flow (two backends — read before changing fetching code)
 
 - **Auth + `/api/books`** are handled by this Next app (`src/app/api/*`). `POST /api/books` validates the body, requires a session (`auth.api.getSession`), and inserts into the `books` collection.
-- **Book CRUD used by the UI** goes to the external server instead: `Add-Books` POSTs to `/Add-Book`, `My-Books` GETs `/My-Books?email=…`, PUTs `/My-Books/:id?email=…`, and DELETEs `/My-Books/:id?email=…`, and `All-Books` / `All-Books/[id]` GET `/All-Books` and `/All-Books/:id`. Import the base URL and the `Book` type from `@/lib/books` (`BOOKS_API`) instead of re-declaring them per page.
+- **Book CRUD used by the UI** goes to the external server instead: `Add-Books` POSTs to `/Add-Book`, `My-Books` GETs `/My-Books`, PUTs `/My-Books/:id`, and DELETEs `/My-Books/:id`, and `All-Books` / `All-Books/[id]` GET `/All-Books` and `/All-Books/:id`. Import the base URL and the `Book` type from `@/lib/books` (`BOOKS_API`) instead of re-declaring them per page.
+- **The external server's private routes require the better-auth session.** `POST /Add-Book`, `GET /My-Books`, `PUT`/`DELETE /My-Books/:id`, and `GET /All-Books/:id` validate the session cookie (or a Bearer token) against MongoDB and derive the owner from `req.user.email` — don't send `?email=` or trust client-supplied `userId`/`userName`/`userEmail`. All cross-origin fetches to `BOOKS_API` must use `credentials: "include"`; the server enables CORS credentials for `CLIENT_URL`. `GET /All-Books` is the only public data route.
 - Before pointing pages at `/api/books` (or changing the hard-coded URL), ask — it changes which server is the source of truth.
 
 ## Conventions & gotchas
