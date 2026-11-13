@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import About from "@/components/About";
 import HeroPage from "@/components/HeroPage";
+import RecentBooks from "@/components/RecentBooks";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       >
         <HeroPage />
       </Suspense>
+      <RecentBooks />
       <About />
     </>
   );

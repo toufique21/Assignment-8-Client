@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import BorrowBookButton from "@/components/BorrowBookButton";
 import { BOOKS_API, type Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
 
@@ -111,6 +112,7 @@ export const BookDetails = () => {
 
   const addedOn = formatDate(book.createdAt);
   const coverSrc = getCoverSrc(book.imageUrl);
+  const availableCopies = typeof book.copies === "number" ? book.copies : 0;
 
   return (
     <section className="container mx-auto px-4 py-10 sm:py-14">
@@ -141,7 +143,7 @@ export const BookDetails = () => {
             <div className="flex flex-wrap items-center gap-2">
               {book.category && <span className={pillClass}>{book.category}</span>}
               <span className="rounded-full bg-brand/10 px-3 py-1 text-[0.6875rem] font-semibold text-brand">
-                {typeof book.copies === "number" ? `${book.copies} copies` : "Available"}
+                {availableCopies === 1 ? "1 copy" : `${availableCopies} copies`}
               </span>
             </div>
 
@@ -175,6 +177,19 @@ export const BookDetails = () => {
                 </div>
               )}
             </dl>
+
+            <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                {availableCopies > 0
+                  ? `${availableCopies === 1 ? "1 copy" : `${availableCopies} copies`} available to borrow.`
+                  : "All copies are currently borrowed. Check back soon."}
+              </p>
+              <BorrowBookButton
+                book={book}
+                onBorrowed={() => setReloadKey((key) => key + 1)}
+                className="w-full sm:ml-auto sm:w-auto"
+              />
+            </div>
           </div>
         </div>
       </div>
