@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import About from "@/components/About";
+import Faq from "@/components/Faq";
 import HeroPage from "@/components/HeroPage";
 import RecentBooks from "@/components/RecentBooks";
 
@@ -15,6 +16,7 @@ export default function Home() {
       </Suspense>
       <RecentBooks />
       <About />
+      <Faq />
     </>
   );
 }
