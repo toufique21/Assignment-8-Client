@@ -9,7 +9,7 @@ import type { Borrow } from "@/lib/borrows";
 import { getCoverSrc } from "@/lib/images";
 
 const primaryButtonClass =
-  "inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  "btn-gloss inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 const headCellClass =
   "px-4 py-3 text-[0.6875rem] font-semibold tracking-wide uppercase text-muted-foreground";
@@ -225,7 +225,7 @@ const MyBorrowsPage = () => {
                             type="button"
                             onClick={() => handleReturn(borrow)}
                             disabled={isReturning}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-4 py-2 text-xs font-semibold text-brand transition hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+                            className="btn-gloss inline-flex items-center justify-center gap-2 rounded-full border border-brand/30 bg-brand/5 px-4 py-2 text-xs font-semibold text-brand transition hover:bg-brand/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {isReturning && (
                               <span

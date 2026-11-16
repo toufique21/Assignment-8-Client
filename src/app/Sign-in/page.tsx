@@ -119,7 +119,7 @@ const SignInPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-gloss mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting && (
               <span
@@ -142,7 +142,7 @@ const SignInPage = () => {
             <button
               type="button"
               onClick={() => handleSocialSignIn("google")}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
+              className="btn-gloss inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
             >
               <FaGoogle className="size-3.5" aria-hidden="true" />
               Google
@@ -150,7 +150,7 @@ const SignInPage = () => {
             <button
               type="button"
               onClick={() => handleSocialSignIn("github")}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
+              className="btn-gloss inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted"
             >
               <FaGithub className="size-3.5" aria-hidden="true" />
               GitHub

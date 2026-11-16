@@ -69,30 +69,20 @@ const RecentBooks = () => {
       className="bg-background py-16 sm:py-20"
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-xl space-y-2">
-            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-              Fresh on the shelf
-            </p>
-            <h2
-              id="recent-books-heading"
-              className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-            >
-              Recently Added Books
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              The six newest books shared by the BookNook community — find your
-              next read.
-            </p>
-          </div>
-
-          <Link
-            href="/All-Books"
-            className="inline-flex items-center gap-2 self-start rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:border-brand/40 hover:text-brand sm:self-auto"
+        <div className="mb-8 max-w-xl space-y-2">
+          <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+            Fresh on the shelf
+          </p>
+          <h2
+            id="recent-books-heading"
+            className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
           >
-            View all books
-            <span aria-hidden="true">→</span>
-          </Link>
+            Recently Added Books
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            The six newest books shared by the BookNook community — find your
+            next read.
+          </p>
         </div>
 
         {isLoading && (
@@ -128,7 +118,7 @@ const RecentBooks = () => {
             <button
               type="button"
               onClick={handleRetry}
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="btn-gloss mt-6 inline-flex items-center justify-center rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Try again
             </button>
@@ -144,7 +134,7 @@ const RecentBooks = () => {
             </p>
             <Link
               href="/Add-Books"
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="btn-gloss mt-6 inline-flex items-center justify-center rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Add a Book
             </Link>
@@ -157,6 +147,18 @@ const RecentBooks = () => {
               <BookCard key={book._id} book={book} />
             ))}
           </ul>
+        )}
+
+        {!isLoading && books.length > 0 && (
+          <div className="mt-10 flex justify-center">
+            <Link
+              href="/All-Books"
+              className="btn-gloss inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:border-brand/40 hover:text-brand"
+            >
+              View all books
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         )}
       </div>
     </section>

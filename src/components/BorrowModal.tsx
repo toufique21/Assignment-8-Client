@@ -118,7 +118,7 @@ const BorrowModal = ({
             type="button"
             onClick={onClose}
             aria-label="Close borrow dialog"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-lg leading-none text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="btn-gloss flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-lg leading-none text-muted-foreground transition hover:bg-muted hover:text-foreground"
           >
             ×
           </button>
@@ -172,14 +172,14 @@ const BorrowModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted"
+              className="btn-gloss inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-gloss inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting && (
                 <span

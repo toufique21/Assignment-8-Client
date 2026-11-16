@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
 
 const UserInfo = () => {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const router = useRouter();
 
@@ -19,7 +19,23 @@ const UserInfo = () => {
 
   return (
     <div className="shrink-0">
-      {user ? (
+      {isPending ? (
+        <div
+          aria-busy="true"
+          className="flex items-center gap-2"
+        >
+          <span className="sr-only">Loading your account…</span>
+
+          <span
+            aria-hidden="true"
+            className="hidden h-4 w-20 animate-pulse rounded-full bg-white/20 sm:block"
+          />
+          <span
+            aria-hidden="true"
+            className="size-10 animate-pulse rounded-full border border-gray-500 bg-white/10 sm:size-11"
+          />
+        </div>
+      ) : user ? (
         <div className="dropdown dropdown-end">
           <div className="flex items-center gap-2 sm:gap-2">
             <span className="hidden max-w-32 truncate text-xs text-white font-semibold sm:block lg:max-w-48 lg:text-base">{user.name}</span>
@@ -61,7 +77,7 @@ const UserInfo = () => {
             <li className="mt-2">
               <button type="button"
                 onClick={handleSignOut}
-                className="justify-center rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-800">Sign Out
+                className="btn-gloss justify-center rounded-xl bg-green-700 py-3 text-sm font-bold text-white hover:bg-green-800">Sign Out
               </button>
             </li>
           </ul>
@@ -74,7 +90,7 @@ const UserInfo = () => {
 
           <Link href="/Sign-Up"
           
-            className=" rounded-full text-gray-300 border border-gray-500 px-3 py-2 text-xs font-thin hover:text-white shadow-sm transition-colors hover:bg-green-600 sm:px-4 sm:py-1 sm:text-sm">Sign Up
+            className="btn-gloss rounded-full text-gray-300 border border-gray-500 px-3 py-2 text-xs font-thin hover:text-white shadow-sm transition-colors hover:bg-green-600 sm:px-4 sm:py-1 sm:text-sm">Sign Up
           </Link>
         </div>
       )}

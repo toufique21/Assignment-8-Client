@@ -4,7 +4,7 @@ import type { Book } from "@/lib/books";
 import { getCoverSrc } from "@/lib/images";
 
 const detailButtonClass =
-  "mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+  "btn-gloss mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-sm transition hover:bg-brand/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
 const BookCard = ({ book }: { book: Book }) => {
   const coverSrc = getCoverSrc(book.imageUrl);
