@@ -78,13 +78,13 @@ Create a `.env` file in the project root:
 BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=your-secret-here
 MONGODB_URL=mongodb://localhost:27017
-NEXT_PUBLIC_BOOKS_API=https://your-book-api.example.com
+NEXT_PUBLIC_BOOK_API=https://your-book-api.example.com
 ```
 
 `src/lib/db.ts` throws on import if `MONGODB_URL` is missing, so these are required for both
-`next dev` and `next build`. `NEXT_PUBLIC_BOOKS_API` is the base URL of the companion book
-API used by the client (see `src/lib/books.ts`); it falls back to `http://localhost:8000`
-when unset.
+`next dev` and `next build`. `NEXT_PUBLIC_BOOK_API` is the base URL of the companion book API
+used by the client (see `src/lib/books.ts`) and is required — the app throws at startup when it
+is missing.
 
 ### 3. Run the app
 
@@ -95,8 +95,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 > The catalogue, borrowing, and book management calls go to the companion API configured in
-> `NEXT_PUBLIC_BOOKS_API` (read in `src/lib/books.ts`; it defaults to `http://localhost:8000`
-> when the variable is unset).
+> `NEXT_PUBLIC_BOOK_API` (read in `src/lib/books.ts`).
 
 ### 4. Useful scripts
 
