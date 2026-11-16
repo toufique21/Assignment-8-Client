@@ -1,4 +1,4 @@
-export const BOOKS_API = "https://booknook-server-side-ten.vercel.app/";
+export const BOOKS_API = "https://booknook-server-side-ten.vercel.app";
 
 export type Book = {
   _id: string;
